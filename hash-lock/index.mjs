@@ -6,52 +6,50 @@ const startingBalance = stdlib.parseCurrency(1000);
 
 const interact = {...stdlib.hasRandom}
 
-const isSender = await ask.ask('Are you The Sender?', ask.yesno)
-
+const isSender = await ask.ask('Are you The Sender?', ask.yesno);
+let acc = null;
+let ctc = null;
 if (isSender) {
   console.log('Hello, Sender')
-  const accSender = await stdlib.newTestAccounts(startingBalance)
-  console.log(accSender);
-  const amt = await ask.ask('Enter amount to transfer: ', (amount)=>{return amount});
+  acc = await stdlib.newTestAccount(startingBalance)
+  const before  = await stdlib.balanceOf(acc)
+  const amt = await ask.ask('Enter amount to transfer: ', (amount)=>{return stdlib.parseCurrency(amount)});
   interact.amt = amt
-  const password = await ask.ask('Enter your a password with 16 characters for this: ', (pw)=>{return pw});
-  while (password.length !=16){
-    const password = await ask.ask('Enter your a password with 16 characters for this: ', (pw)=>{return pw});
+  let password = await ask.ask('Enter your a password with 16 characters for this: ', (pw)=>{return pw});
+  while (password.length != 16){
+    password = await ask.ask('Enter your a password with 16 characters for this: ', (pw)=>{return pw});
+
+    console.log(password);
+    console.log(password.length);
+    if(password.length==16) break;
   }
   interact.passWord = password
-  const ctc = accSender.contract(backend)
-  const info =  ctc.getInfo()
+ ctc = acc.contract(backend)
+  ctc.getInfo().then((info)=>{
+    console.log(`The contract is deployed as ${JSON.stringify(info)}`);
+  });
   console.log('Launching...');
-  console.log(`The contract is deployed as ${JSON.stringify(info)}`)
 } else{
   console.log('Hello Reciever')
-  const accReciever = await stdlib.newTestAccounts(startingBalance)
-  comsole.log(accReciever)
+  acc = await stdlib.newTestAccount(startingBalance)
+  console.log(acc)
   const info = await ask.ask('Paste the Contract Address:', JSON.parse)
-  const ctc = accReciever.contract(backend, info);
+  ctc = acc.contract(backend, info);
   interact.getPass = async () => await ask.ask('Enter the password?', (pass)=> {return pass;})
   
 };
+const before  = await stdlib.parseCurrency(await stdlib.balanceOf(acc));
 
 console.log('Launching...');
 console.log('Starting backends...');
-// await Promise.all([
-//   backend.Alice(ctcAlice, {
-    
-//     // implement Alice's interact 
-//   }),
-//   backend.Bob(ctcBob, {
-//     getPass: async () =>{
-//       return passWord
-//     }
-//     ...stdlib.hasRandom,
-//     // implement Bob's interact object here
-//   }),
-// ]);
 
-user = isSender ? 'Sender': 'Reciever'
+const user = isSender ? 'Sender': 'Reciever'
 console.log(`${user}`);
 
-part = isSender ? ctc.p.Alice: ctc.p.Bob;
+const part = isSender ? ctc.p.Alice: ctc.p.Bob;
 
-await part(interact)
+await part(interact);
+const after  = await stdlib.parseCurrency(await stdlib.balanceOf(acc));
+
+console.log(`Your balance went from ${before} to ${after}`);
+ask.done();
