@@ -1,3 +1,9 @@
 
 hash-lock/.vscode/settings.json
 hash-lock/reach
+/.idea/
+/hash-lock/.idea/
+/.vscode/
+/hash-lock/.vscode/
+/relay/.vscode/
+/trust-fund/.vscode/
