@@ -16,12 +16,9 @@ if (isSender) {
   const amt = await ask.ask('Enter amount to transfer: ', (amount)=>{return stdlib.parseCurrency(amount)});
   interact.amt = amt
   let password = await ask.ask('Enter your a password with 16 characters for this: ', (pw)=>{return pw});
-  while (password.length != 16){
+  while (password.length !== 16){
     password = await ask.ask('Enter your a password with 16 characters for this: ', (pw)=>{return pw});
-
-    console.log(password);
-    console.log(password.length);
-    if(password.length==16) break;
+    if(password.length===16) break;
   }
   interact.passWord = password
  ctc = acc.contract(backend)
