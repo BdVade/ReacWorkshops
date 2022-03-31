@@ -48,8 +48,13 @@ user = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3
       }
   else if (user == 'Reciever'){
     const ctcInfo = await ask.ask('Enter the contract information of the contract you want to connect to', JSON.parse)
+    const secret = await ask.ask('Enter your account Secret', ((x)=>{return x}))
+    recieverAccount = await stdlib.NewAccountFromSecret(secret);
+    ctc = recieverAccount.contract(backend, ctcInfo);
     
   }
+
+  // TODO: Interface for Bystander
   
 
 console.log('Launching...');
