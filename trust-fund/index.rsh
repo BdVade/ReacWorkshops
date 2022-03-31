@@ -3,7 +3,7 @@
 export const main = Reach.App(() => {
   const Funder = Participant('Funder', {
     // Specify Alice's interact interface here
-    getReciever: Fun([], Address),
+    Reciever: Address,
     amount: UInt,
     waitingTime: UInt,
     refund: UInt,
@@ -24,7 +24,7 @@ export const main = Reach.App(() => {
      const waitingTime = declassify(interact.waitingTime)
      const refund = declassify(interact.refund)
      const dormant = declassify(interact.dormant)
-     const reciever = declassify(interact.getReciever())
+     const reciever = declassify(interact.Reciever)
   })
   Funder.publish(amt, waitingTime, refund, dormant, reciever).pay(amt);
   Reciever.set(reciever)
