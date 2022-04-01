@@ -30,13 +30,13 @@ export const main = Reach.App(() => {
   Reciever.set(reciever)
   commit();
 
-  wait(waitingTime)
+  wait(relativeTime(waitingTime))
   // The second one to publish always attaches
   Reciever.publish()
-  .timeout(refund, 
+  .timeout(relativeTime(refund), 
     () =>{
       Funder.publish()
-        .timeout(dormant, () =>{
+        .timeout(relativeTime(dormant), () =>{
           ByStander.publish();
           transfer(amt).to(ByStander)
           commit();

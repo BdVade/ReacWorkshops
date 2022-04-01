@@ -13,7 +13,7 @@ user = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3
   ((entered)=>{
     const options = [1, 2, 3]
     while (!options.includes(entered)){
-      entered = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3 to claim a dormant trust', (e=>e));
+      entered = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3 to claim a dormant trustfund', ((x)=>{return x}));
       if(options.includes(entered)){
         break;
       }
@@ -29,6 +29,7 @@ user = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3
     };
     
   }));
+  let part = null
     let ctc = null;
   if (user == 'Funder'){
       const acc = await stdlib.newTestAccount(startingBalance);
@@ -45,32 +46,42 @@ user = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3
       ctc.getInfo().then((info)=>{
         console.log(`This contract is deployed as ${JSON.stringify(info)}`)
       })
+      part = ctc.p.Funder
       }
   else if (user == 'Reciever'){
     const ctcInfo = await ask.ask('Enter the contract information of the contract you want to connect to', JSON.parse)
     const secret = await ask.ask('Enter your account Secret', ((x)=>{return x}))
     recieverAccount = await stdlib.NewAccountFromSecret(secret);
     ctc = recieverAccount.contract(backend, ctcInfo);
-    
+    part = ctc.p.Reciever
+  }
+  else if (user == 'ByStander'){
+    const ctcInfo = await ask.ask('Enter the contract information of the contract you want to connect to', JSON.parse)
+    const secret = await ask.ask('Enter your account Secret', ((x)=>{return x}));
+    bystanderAccount = await stdlib.NewAccountFromSecret(secret);
+    ctc = bystanderAccount.contract(backend, ctcInfo);  
+    part =  ctc.p.ByStander
   }
 
-  // TODO: Interface for Bystander
+  // TODO: write Script to create Account for reciever and give details for funder
+  // TODO: Check if passing a different acount from what the funder passes will give any issues
+  // TODO: Check Participants balance to see if the get or sent the trust fund.
+  // TODO: Return message if A user attempts to use contract while waiting. Check your tut index.rsh line 19,39
   
-
 console.log('Launching...');
-const ctcAlice = accAlice.contract(backend);
-const ctcBob = accBob.contract(backend, ctcAlice.getInfo());
+await part(interact)
 
-console.log('Starting backends...');
-await Promise.all([
-  backend.Alice(ctcAlice, {
-    ...stdlib.hasRandom,
-    // implement Alice's interact object here
-  }),
-  backend.Bob(ctcBob, {
-    ...stdlib.hasRandom,
-    // implement Bob's interact object here
-  }),
-]);
+// console.log('Starting backends...');
+// await Promise.all([
+//   backend.Alice(ctcAlice, {
+//     ...stdlib.hasRandom,
+//     // implement Alice's interact object here
+//   }),
+//   backend.Bob(ctcBob, {
+//     ...stdlib.hasRandom,
+//     // implement Bob's interact object here
+//   }),
+// ]);
 
-console.log('Goodbye, Alice and Bob!');
+// console.log('Goodbye, Alice and Bob!');
+
