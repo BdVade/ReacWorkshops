@@ -10,10 +10,10 @@ const interact = {}
 console.log('Hello, Alice and Bob!');
 
 user = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3 to claim a dormant trust', 
-  ((entered)=>{
+  (entered)=>{
     const options = [1, 2, 3]
     while (!options.includes(entered)){
-      entered = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3 to claim a dormant trustfund', ((x)=>{return x}));
+      entered =await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3 to claim a dormant', (x)=>{return x});
       if(options.includes(entered)){
         break;
       }
@@ -28,7 +28,7 @@ user = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3
       return 'Bystander'
     };
     
-  }));
+  });
   let part = null
     let ctc = null;
   if (user == 'Funder'){
