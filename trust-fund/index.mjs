@@ -53,13 +53,26 @@ user = await ask.ask('Enter 1 to create a trust 2 to claim an active trust and 3
     const secret = await ask.ask('Enter your account Secret', ((x)=>{return x}))
     recieverAccount = await stdlib.NewAccountFromSecret(secret);
     ctc = recieverAccount.contract(backend, ctcInfo);
-    part = ctc.p.Reciever
+    let timeUp = ctc.events.waitTime.timeOver;
+    while (!timeUp){
+      console.log('The wait itme before the trust can be accessed is not over')
+      if (ctc.events.waitTime.timeOver){
+        break;
+      }
+    }
+    part = ctc.p.Reciever;
   }
   else if (user == 'ByStander'){
     const ctcInfo = await ask.ask('Enter the contract information of the contract you want to connect to', JSON.parse)
     const secret = await ask.ask('Enter your account Secret', ((x)=>{return x}));
     bystanderAccount = await stdlib.NewAccountFromSecret(secret);
-    ctc = bystanderAccount.contract(backend, ctcInfo);  
+    ctc = bystanderAccount.contract(backend, ctcInfo);
+    while (!timeUp){
+      console.log('The wait itme before the trust can be accessed is not over')
+      if (ctc.events.waitTime.timeOver){
+        break;
+      }
+    }  
     part =  ctc.p.ByStander
   }
 

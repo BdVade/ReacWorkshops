@@ -9,6 +9,10 @@ export const main = Reach.App(() => {
     refund: UInt,
     dormant: UInt
   });
+
+  const waitTime = Events('waitTime', {
+    timeOver: [Bool]
+  })
   const Reciever = Participant('Reciever', {
     // Specify Bob's interact interface here
 
@@ -30,7 +34,8 @@ export const main = Reach.App(() => {
   Reciever.set(reciever)
   commit();
 
-  wait(relativeTime(waitingTime))
+  wait(relativeTime(waitingTime));
+  waitTime.timeOver(true);
   // The second one to publish always attaches
   Reciever.publish()
   .timeout(relativeTime(refund), 
