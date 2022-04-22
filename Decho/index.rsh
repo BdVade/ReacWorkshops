@@ -5,22 +5,22 @@ export const main = Reach.App(() => {
     approvalLimit: UInt,
     donationLimit: UInt,
     state: UInt,
-    name: Bytes[16],
-    url: Bytes,
+    name: UInt, // place holder. figure out how to return Bytes
+    url: UInt,
     approvalRxpiryDate: UInt,
-    donationExpiryDate: Uint,
+    donationExpiryDate: UInt,
     causeAccount: Address
   });
   const voter = Participant('Voter', {
     amount: UInt,
     assetID: UInt,
+    claim:Fun([], Null)
   });
    const checker = Participant('Checker', {
     
    })
-   let approvalAsset = None
- let approvals = Map(Address, UInt)
- let donations = Map(Address, UInt)
+ const approvals = new Map(Address, UInt)
+ const donations = new Map(Address, UInt)
   init();
   const approvalLimit = declassify(interact.approvalLimit)
   const donationLimit = declassify(interact.donationLimit)
@@ -28,6 +28,7 @@ export const main = Reach.App(() => {
   const name = declassify(interact.name)
   const url = declassify(interact.url)
   const expiryDate = declassify(interact.expiryDate)
+  const causeAccount = declassify(interact.causeAccount)
   creator.publish(approvalLimit, donationLimit,state, name, url, expiryDate);
   checker.set(None) // An address/account. To be determined later
   commit();
@@ -38,14 +39,28 @@ export const main = Reach.App(() => {
   })
   if (asset == 0){
     voter.publish().pay(amount)
-    donations[this]= amount
+    if (donations.has(this)){
+      approvals[this]+=amount
+    } else{
+      donations[this] = amount
+    }
   } else{
     voter.publish.pay([amount, asset])
-    approvals[this] = amount
+    
+    if (approvals.has(this)){
+      approvals[this]+=amount
+    } else{
+      approvals[this] = amount
+    }
   }
 
   voter.publish();
   commit();
   // write your program here
+  //when deadline passes or balance is completed.
+  transfer(donationLimit).to(causeAccount)
+
+  // use map.forEach() to return modey to voters and donating people
+  
   exit();
 });
