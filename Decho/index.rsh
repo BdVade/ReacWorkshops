@@ -112,6 +112,14 @@ export const main = Reach.App(()=>{
    } = projectDetails
   const voters_list = new Map(Address,UInt);
   const donators = new Map(Address,UInt);
+
+  const refundLoop = (storeMap, asa_id) =>{
+    if(asa_id!=0){
+      // Loop and transfer asset
+    }else{
+      // Loop and transfer Algo
+    }
+  }
   const  votesBalance = 
   parallelReduce(balance())
     .invariant(balance()>=0)
@@ -130,19 +138,7 @@ export const main = Reach.App(()=>{
         return votesBalance+amount
       }))
 
-     .timeout(approvalDeadline, () => {
-       const [voters_remaining] =
-       parallelReduce([ voters.size() ]) // Voters map length
-         .invariant(0==0)
-         .while(voters_remaining>0)
-        // find a way to loop over the map and send to all to avoid using a timeout
-          .api(voter.claimFunds,
-            (() => {assume(voters_list[this])}),
-            (()=> pass),
-            ((setResponse) => {transfer(fromSome(voters_list[this],0 )).to(this)
-              setResponse(True)
-                    }))
-          })
+     .timeout(approvalDeadline, () => {refundLoop(voters_list, 123456)}) // change secong parameter to choice Id
      
 
      const [donationsBalance] = 
@@ -165,18 +161,38 @@ export const main = Reach.App(()=>{
         return donationsBalance+amount})
         )
         .timeout(donationDeadline, () => {
-          const donators_remaining =
-       parallelReduce( donators.size() ) // Voters map length
-         .invariant(0==0)
-         .while(donators_remaining>0)
-        // find a way to loop over the map and send to all to avoid using a timeout
-          .api(donator.reclaimDonations,
-            (() => {assume(donators.has(this))}),
-            (()=> pass),
-            ((setResponse) => {transfer(donators[this]).to(this)
-                    setResponse(true)
-                    }))
+        refundLoop(donators, 0)
         });
         commit();
   exit();
 })
+
+
+
+
+
+// voting Timeout parallel reduce
+// const [voters_remaining] =
+// parallelReduce([ voters.size() ]) // Voters map length
+//   .invariant(0==0)
+//   .while(voters_remaining>0)
+//  // find a way to loop over the map and send to all to avoid using a timeout
+//    .api(voter.claimFunds,
+//      (() => {assume(voters_list[this])}),
+//      (()=> pass),
+//      ((setResponse) => {transfer(fromSome(voters_list[this],0 )).to(this)
+//        setResponse(True)
+//              }))
+
+// Donation Timeout parallel reduce
+// const donators_remaining =
+// parallelReduce( donators.size() ) // Voters map length
+//   .invariant(0==0)
+//   .while(donators_remaining>0)
+//  // find a way to loop over the map and send to all to avoid using a timeout
+//    .api(donator.reclaimDonations,
+//      (() => {assume(donators.has(this))}),
+//      (()=> pass),
+//      ((setResponse) => {transfer(donators[this]).to(this)
+//              setResponse(true)
+//              }))
