@@ -110,24 +110,25 @@ export const main = Reach.App(()=>{
   donationDeadline,
   fowardingAccount
    } = projectDetails
-  const voters = new Map(UInt)
-  const donators = new Map(UInt)
-  const  votes_balance = 
+  const voters_list = new Map(Address,UInt);
+  const donators = new Map(Address,UInt);
+  const  votesBalance = 
   parallelReduce(balance())
     .invariant(balance()>=0)
-    .while(balance()<approvalLimit)
+    .while(votesBalance<approvalLimit)
     .api(voter.vote, 
       ((amount) => assume(amount>0)),
       ((amount) =>  amount ),
-      (setResponse) => {
-        if (voters[this]){
-          voters[this]+=amount
+      ((amount,setResponse) => {
+        if (voters_list[this]){
+          const new_balance = fromSome(voters_list[this],0) + amount
+          voters_list[this] = new_balance
         } else{
-          voters[this]=amount
+          voters_list[this]=amount
         }
         setResponse(true)
-        return votes_balance+amount
-      })
+        return votesBalance+amount
+      }))
 
      .timeout(approvalDeadline, () => {
        const [voters_remaining] =
@@ -136,9 +137,9 @@ export const main = Reach.App(()=>{
          .while(voters_remaining>0)
         // find a way to loop over the map and send to all to avoid using a timeout
           .api(voter.claimFunds,
-            (() => {assume(voters.has(this))}),
+            (() => {assume(voters_list[this])}),
             (()=> pass),
-            ((setResponse) => {transfer(voters[this]).to(this)
+            ((setResponse) => {transfer(fromSome(voters_list[this],0 )).to(this)
               setResponse(True)
                     }))
           })
