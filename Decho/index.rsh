@@ -120,10 +120,10 @@ export const main = Reach.App(()=>{
       // Loop and transfer Algo
     }
   }
-  const  votesBalance = 
-  parallelReduce(balance())
+  const  [votesBalance, keepGoing] = 
+  parallelReduce([balance(), true])
     .invariant(balance()>=0)
-    .while(votesBalance<approvalLimit)
+    .while(votesBalance<approvalLimit && keepGoing)
     .api(voter.vote, 
       ((amount) => assume(amount>0)),
       ((amount) =>  amount ),
@@ -135,22 +135,28 @@ export const main = Reach.App(()=>{
           voters_list[this]=amount
         }
         setResponse(true)
-        return votesBalance+amount
+        return [votesBalance+amount,true]
       }))
 
-     .timeout(approvalDeadline, () => {refundLoop(voters_list, 123456)}) // change secong parameter to choice Id
+     .timeout(relativeSecs(approvalDeadline), () => {
+       Anybody.publish()
+       refundLoop(voters_list, 123456)
+       return [votesBalance, false]
+      }) // change secong parameter to choice Id
      
 
-     const [donationsBalance] = 
-     parallelReduce([ balance() ])
+     const [donationsBalance, GoingOn] = 
+     parallelReduce([balance(), true])
        .invariant(balance()>=0)
        .while(donationsBalance<donationLimit)
        .api(donator.donate,
         ((amount)=> {assume(amount>0)}),
-        ((amount)=>{ amount }),
+        ((amount)=> amount ),
         ((amount, setResponse) => {
+          //isSome(this)
           if (donators[this]){
-              donators[this]+=amount
+              const new_donators_balance = fromSome(voters_list[this],0) + amount
+              donators[this] = new_donators_balance
           } else {
             donators[this]=amount
           }
@@ -158,10 +164,12 @@ export const main = Reach.App(()=>{
           if (balance()>=donationLimit){
             transfer(balance()).to(fowardingAccount)
           }
-        return donationsBalance+amount})
+        return [donationsBalance+amount, true]})
         )
-        .timeout(donationDeadline, () => {
-        refundLoop(donators, 0)
+        .timeout(relativeSecs(donationDeadline), () => {
+          Anybody.publish()
+          refundLoop(donators, 0)
+          return[donationsBalance, false]
         });
         commit();
   exit();
