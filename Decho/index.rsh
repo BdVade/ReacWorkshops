@@ -115,9 +115,10 @@ export const main = Reach.App(()=>{
 
   const refundLoop = (storeMap, asa_id) =>{
     if(asa_id!=0){
-      // Loop and transfer asset
+      // storeMap.forEach((_address)=>transfer(storeMap[_address]).to(_address))
+      // change to transfer asset when deploying to testnet
     }else{
-      // Loop and transfer Algo
+      // storeMap.forEach((address)=>transfer(storeMap[_address]).to(_address))
     }
   }
   const  [votesBalance, keepGoing] = 
@@ -142,7 +143,7 @@ export const main = Reach.App(()=>{
        Anybody.publish()
        refundLoop(voters_list, 123456)
        return [votesBalance, false]
-      }) // change secong parameter to choice Id
+      }) // change second parameter to choice Id
      
 
      const [donationsBalance, GoingOn] = 
