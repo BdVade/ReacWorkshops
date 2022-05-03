@@ -114,12 +114,17 @@ export const main = Reach.App(()=>{
   const donators = new Map(Address,UInt);
 
   const refundLoop = (storeMap, asa_id) =>{
+    // var passed_count = 0;
+    // invariant(passed_count<=Map.size(storeMap));
+    // while(passed_count<=Map.size(storeMap)) {
     if(asa_id!=0){
       // storeMap.forEach((_address)=>transfer(storeMap[_address]).to(_address))
       // change to transfer asset when deploying to testnet
     }else{
       // storeMap.forEach((address)=>transfer(storeMap[_address]).to(_address))
     }
+    // passed_count+=1
+  // }
   }
   const  [votesBalance, keepGoing] = 
   parallelReduce([balance(), true])
@@ -173,6 +178,7 @@ export const main = Reach.App(()=>{
           return[donationsBalance, false]
         });
         commit();
+        
   exit();
 })
 
