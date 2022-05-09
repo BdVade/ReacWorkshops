@@ -8,6 +8,7 @@ const ProjectDetails = Object({
 export const main = Reach.App(() => {
   const Creator = Participant('Creator', {
     details: ProjectDetails,
+    declareWinner: Fun([Address], Null)
     // withdrawFunds: Fun([Address], Null) Send to to wallets
     })
     
@@ -37,15 +38,19 @@ export const main = Reach.App(() => {
       ((amount)=> {
         assume(amount>0)
         assume(amount>=biddingFloor)
+        // assume(balance(this)>=biddingFloor)
       }),
       ((amount)=> 0),
-      ((amount)=>{
-        
+      ((amount, setResponse)=>{
+        Bids[this]= amount
+        setResponse(true)
+        return true
       })
-
+      
     )
-     .timeout(deadline, () => {
-       Anybody.publish(Map.max(Bids))
+     .timeout(relativeSecs(deadline), () => {
+       const winner = Map.max(Bids)
+       Anybody.publish(winner)
        return false;
        });
   commit();
