@@ -15,6 +15,7 @@ export const main = Reach.App(() => {
   const Bidder = API('Bidder', {
     bid: Fun([UInt], Bool)
   });
+
   
   init();
   // The first one to publish deploys the contract
@@ -28,10 +29,12 @@ export const main = Reach.App(() => {
     biddingFloor,
     deadline
   } = projectDetails
-
-  const Bids = new Map(UInt)
-  const keepGoing = 
-  parallelReduce(true)
+//  use UInt to store 
+// Users to claim
+  // let highestBid = 0
+  // let highestBidder = Null
+  const [keepGoing, highestBid, highestBidder] = 
+  parallelReduce([true, 0, this])
     .invariant(balance()>=0)
     .while(keepGoing)
     .api(Bidder.bid,
@@ -42,15 +45,20 @@ export const main = Reach.App(() => {
       }),
       ((amount)=> 0),
       ((amount, setResponse)=>{
-        Bids[this]= amount
-        setResponse(true)
-        return true
-      })
+        if(amount>highestBid){
+          setResponse(true)
+          return [true, amount, this]
+        }
+        else{
+        setResponse(false)
+        return[true, highestBid, highestBidder]
+    }
+  })
       
     )
      .timeout(relativeSecs(deadline), () => {
-       const winner = Map.max(Bids)
-       Anybody.publish(winner)
+       const winner = highestBidder
+       highestBidder.pay(highestBid)
        return false;
        });
   commit();
