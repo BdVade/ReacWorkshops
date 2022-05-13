@@ -1,15 +1,16 @@
 'reach 0.1';
 const ProjectDetails = Object({
   name:Bytes(32),
-  url:Bytes(32),
+  nftId: Token,
   biddingFloor: UInt,
   deadline: UInt
 })
 export const main = Reach.App(() => {
   const Creator = Participant('Creator', {
     details: ProjectDetails,
-    declareWinner: Fun([Address], Null)
-    // withdrawFunds: Fun([Address], Null) Send to to wallets
+    declareWinner: Fun([Address, UInt], Null),
+    topBid: Fun([Address, UInt], Null),
+    // withdrawFunds: Fun([Address], Null) Send to to wallet
     })
     
   const Bidder = API('Bidder', {
@@ -25,45 +26,49 @@ export const main = Reach.App(() => {
   Creator.publish(projectDetails);
   const{
     name,
-    url,
+    nftId,
     biddingFloor,
     deadline
   } = projectDetails
+  commit();
 //  use UInt to store 
 // Users to claim
   // let highestBid = 0
   // let highestBidder = Null
-  const [keepGoing, highestBid, highestBidder] = 
-  parallelReduce([true, 0, this])
-    .invariant(balance()>=0)
+  const amt = 1;
+  Creator.pay([[amt, nftId]]);
+  check(balance(nftId) == amt, "balance of NFT is wrong");
+
+  const [keepGoing, highestBid, highestBidder, isFirstBid] = 
+  parallelReduce([true, biddingFloor, this, true])
+    .invariant(balance(nftId)== amt && balance() == (isFirstBid ?0 : highestBid))
     .while(keepGoing)
     .api(Bidder.bid,
       ((amount)=> {
-        assume(amount>0)
-        assume(amount>=biddingFloor)
+        
+        assume(amount>highestBid, "bid is too low")
         // assume(balance(this)>=biddingFloor)
       }),
-      ((amount)=> 0),
+      ((amount)=> amount),
       ((amount, setResponse)=>{
-        if(amount>highestBid){
+          if (!isFirstBid){
+            transfer(highestBid).to(highestBidder)
+          }
+          Creator.interact.topBid(this, amount)
           setResponse(true)
-          return [true, amount, this]
-        }
-        else{
-        setResponse(false)
-        return[true, highestBid, highestBidder]
-    }
+          return [true, amount, this, false]
+     
   })
       
     )
      .timeout(relativeSecs(deadline), () => {
-       const winner = highestBidder
-       highestBidder.pay(highestBid)
-       return false;
+       Creator.publish();
+       return [false, highestBid, highestBidder, isFirstBid]
+       
        });
+       transfer(amt, nftId).to(highestBidder);
+       if(!isFirstBid){ transfer(highestBid).to(Creator); }
+       Creator.interact.declareWinner(highestBidder, highestBid);
   commit();
-  // The second one to publish always attaches
-  // commit();
-  // write your program here
   exit();
 });
