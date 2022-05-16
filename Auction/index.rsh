@@ -21,15 +21,15 @@ export const main = Reach.App(() => {
   init();
   // The first one to publish deploys the contract
   Creator.only(()=>{
-    const projectDetails = declassify(interact.details)
+    const {
+      name,
+      nftId,
+      biddingFloor,
+      deadline
+    }  = declassify(interact.details)
   })
-  Creator.publish(projectDetails);
-  const{
-    name,
-    nftId,
-    biddingFloor,
-    deadline
-  } = projectDetails
+  Creator.publish(name, nftId, biddingFloor, deadline);
+
   commit();
 //  use UInt to store 
 // Users to claim
@@ -57,6 +57,7 @@ export const main = Reach.App(() => {
           Creator.interact.topBid(this, amount)
           setResponse(true)
           return [true, amount, this, false]
+
      
   })
       
