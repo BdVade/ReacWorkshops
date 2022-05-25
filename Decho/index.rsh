@@ -176,9 +176,10 @@ export const main = Reach.App(()=>{
           Anybody.publish()
           refundLoop(donators, 0)
           return[donationsBalance, false]
+          
         });
+        // transfer(balance).to(creator)
         commit();
-        
   exit();
 })
 
